@@ -3,19 +3,16 @@ package io.transpect.basex.extensions.subversion;
 import java.io.File;
 import java.io.IOException;
 
-import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNCommitClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 
-import org.basex.query.value.node.FElem;
+import org.basex.query.value.node.FNode;
 import org.basex.query.value.map.XQMap;
 import org.basex.query.QueryException;
 
-import io.transpect.basex.extensions.subversion.XSvnConnect;
-import io.transpect.basex.extensions.subversion.XSvnXmlReport;
 /**
  * This class provides the svn delete command. The class 
  * connects to a Subversion remote repository or a
@@ -27,9 +24,8 @@ public class XSvnDelete {
   /**
   * @deprecated  username/password login replaced with XQMap auth
   */
-  public FElem XSvnDelete ( String url, String username, String password, String path, Boolean force, String commitMessage ) {
+  public FNode XSvnDelete ( String url, String username, String password, String path, Boolean force, String commitMessage ) {
     Boolean dryRun = false;
-    XSvnXmlReport report = new XSvnXmlReport(); 
     try{
       XSvnConnect connection = new XSvnConnect(url, username, password);
       SVNClientManager clientmngr = connection.getClientManager();
@@ -47,17 +43,14 @@ public class XSvnDelete {
           client.doDelete(fullPath, force, dryRun);
         }
       }
-      FElem xmlResult = report.createXmlResult(baseURI, "delete", paths);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(baseURI, "delete", paths);
     } catch(SVNException|IOException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
-  public FElem XSvnDelete ( String url, XQMap auth, String path, Boolean force, String commitMessage ) {
+  public FNode XSvnDelete ( String url, XQMap auth, String path, Boolean force, String commitMessage ) {
     Boolean dryRun = false;
-    XSvnXmlReport report = new XSvnXmlReport(); 
     try{
       XSvnConnect connection = new XSvnConnect(url, auth);
       SVNClientManager clientmngr = connection.getClientManager();
@@ -75,12 +68,10 @@ public class XSvnDelete {
           client.doDelete(fullPath, force, dryRun);
         }
       }
-      FElem xmlResult = report.createXmlResult(baseURI, "delete", paths);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(baseURI, "delete", paths);
     } catch(QueryException | SVNException|IOException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
 }

@@ -2,7 +2,6 @@ package io.transpect.basex.extensions.subversion;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.FileWriter;
 
 import java.util.Date;
 
@@ -14,12 +13,10 @@ import org.tmatesoft.svn.core.wc.SVNCommitClient;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 
-import org.basex.query.value.node.FElem;
+import org.basex.query.value.node.FNode;
 import org.basex.query.value.map.XQMap;
 import org.basex.query.QueryException;
 
-import io.transpect.basex.extensions.subversion.XSvnConnect;
-import io.transpect.basex.extensions.subversion.XSvnXmlReport;
 /**
  * This class provides the svn mkdir command. The class 
  * connects to a Subversion repository and creates 
@@ -32,7 +29,7 @@ public class XSvnMkDir {
   /**
   * @deprecated  username/password login replaced with XQMap auth
   */
-  public FElem XSvnMkDir (String url, String username, String password, String dir, Boolean parents, String commitMessage) {
+  public FNode XSvnMkDir (String url, String username, String password, String dir, Boolean parents, String commitMessage) {
     XSvnXmlReport report = new XSvnXmlReport();
     Boolean force = false;
     Boolean addAndMkdir = true;
@@ -55,15 +52,13 @@ public class XSvnMkDir {
           client.doAdd(path, force, addAndMkdir, climbUnversionedParents, SVNDepth.IMMEDIATES, includeIgnored, parents);
         }
       }
-      FElem xmlResult = report.createXmlResult(baseURI, "mkdir", dirs);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(baseURI, "mkdir", dirs);
     } catch(SVNException|IOException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
-	public FElem XSvnMkDir (String url, XQMap auth, String dir, Boolean parents, String commitMessage) {
+	public FNode XSvnMkDir (String url, XQMap auth, String dir, Boolean parents, String commitMessage) {
     XSvnXmlReport report = new XSvnXmlReport();
     Boolean force = false;
     Boolean addAndMkdir = true;
@@ -91,12 +86,10 @@ public class XSvnMkDir {
           }
         }
       }
-      FElem xmlResult = report.createXmlResult(baseURI, "mkdir v1.6" + info.toString(), dirs);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(baseURI, "mkdir v1.6" + info.toString(), dirs);
     } catch(QueryException | SVNException|IOException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
 }

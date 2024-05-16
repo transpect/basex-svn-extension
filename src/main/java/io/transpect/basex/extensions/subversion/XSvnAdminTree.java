@@ -1,4 +1,4 @@
-package io.transpect.calabash.extensions.subversion;
+package io.transpect.basex.extensions.subversion;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -14,16 +14,6 @@ import net.sf.saxon.om.SingletonAttributeMap;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.EmptyAttributeMap;
 
-import com.xmlcalabash.core.XMLCalabash;
-import com.xmlcalabash.core.XProcRuntime;
-import com.xmlcalabash.core.XProcConstants;
-import com.xmlcalabash.io.WritablePipe;
-import com.xmlcalabash.library.DefaultStep;
-import com.xmlcalabash.model.RuntimeValue;
-import com.xmlcalabash.runtime.XAtomicStep;
-import com.xmlcalabash.util.TreeWriter;
-import com.xmlcalabash.util.TypeUtils;
-
 import org.tmatesoft.svn.core.SVNLock;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNDirEntry;
@@ -34,9 +24,6 @@ import org.tmatesoft.svn.core.wc.DefaultSVNRepositoryPool;
 import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.svn.ISVNConnector;
 import org.tmatesoft.svn.core.SVNURL;
-
-import io.transpect.calabash.extensions.subversion.XSvnConnect;
-import io.transpect.calabash.extensions.subversion.XSvnXmlReport;
 /**
  * Performs svn ls as XML Calabash extension step for
  * XProc. The class connects to a Subversion repository,

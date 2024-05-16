@@ -5,20 +5,14 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import org.basex.query.value.node.FElem;
 import org.basex.query.value.map.XQMap;
 import org.basex.query.value.item.*;
 import org.basex.query.value.Value;
-import org.basex.query.value.type.AtomType;
-import org.basex.query.QueryError;
 import org.basex.query.QueryException;
 
 import org.tmatesoft.svn.core.SVNException;
-import org.tmatesoft.svn.core.SVNErrorMessage;
-import org.tmatesoft.svn.core.SVNErrorCode;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.io.SVNRepository;
-import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
@@ -26,9 +20,6 @@ import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
-import org.tmatesoft.svn.core.wc.SVNRevision;
-import org.tmatesoft.svn.core.wc.SVNInfo;
-import org.tmatesoft.svn.core.internal.wc.DefaultSVNAuthenticationManager;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.auth.SVNAuthentication;
 import org.tmatesoft.svn.core.auth.SVNSSLAuthentication;
@@ -226,8 +217,8 @@ public class XSvnConnect {
   
   private String getStringFromMap(XQMap map, String key) throws QueryException{
       Str strKey = Str.get(key);
-    if (map.contains(strKey, null)){
-      Value val = map.get(strKey, null);
+    if (map.contains(strKey)){
+      Value val = map.get(strKey);
       String result = new String(val.toString());
       return result.replace("\"","");
     } else {

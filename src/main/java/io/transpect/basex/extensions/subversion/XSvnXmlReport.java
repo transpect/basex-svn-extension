@@ -17,7 +17,12 @@ import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.io.SVNRepository;
 
 import org.basex.query.value.node.FElem;
+import org.basex.query.value.node.FNode;
+import org.basex.query.value.node.FBuilder;
+import org.basex.query.value.item.QNm;
 import org.basex.query.value.map.XQMap;
+
+import io.transpect.basex.extensions.subversion.XSvnHelper;
 
 /**
  * Returns reports or errors as XML (currently only
@@ -31,58 +36,59 @@ public class XSvnXmlReport {
   /**
    * Render a HashMap as XML c:param-set
    */
-  public static FElem createXmlResult(HashMap<String, String> results) {
-    FElem xmlResult = new FElem(nsprefix, "param-set", nsuri);
+  public static FNode createXmlResult(HashMap<String, String> results) {
+    FBuilder xmlResult = XSvnHelper.build( "param-set", nsuri, nsprefix);
     for(String key:results.keySet()) {
-      FElem paramElement = new FElem(nsprefix, "param", nsuri);
-      paramElement.add("name", key);
-      paramElement.add("value", results.get(key));
+      FBuilder paramElement = XSvnHelper.build("param", nsuri, nsprefix);
+      paramElement = XSvnHelper.attach(paramElement,"name",key);
+      paramElement = XSvnHelper.attach(paramElement,"value",results.get(key));
       xmlResult.add(paramElement);
     }
-    return xmlResult;
+    return xmlResult.finish();
   }
-  public static FElem createXmlResult(String baseURI, String type, String[] results) {
-    FElem xmlResult = new FElem(nsprefix, "param-set", nsuri);
-    xmlResult.add("xml:base", baseURI);
+  public static FNode createXmlResult(String baseURI, String type, String[] results) {
+    FBuilder xmlResult = XSvnHelper.build("param-set", nsuri, nsprefix);
+    xmlResult = XSvnHelper.attach(xmlResult,"xml:base",baseURI);
     for(int i = 0; i < results.length; i++){
-      FElem paramElement = new FElem(nsprefix, "param", nsuri);
-      paramElement.add("name", type);
-      paramElement.add("value", results[i]);
+      FBuilder paramElement = XSvnHelper.build("param", nsuri, nsprefix);
+      paramElement = XSvnHelper.attach(paramElement,"name",type);
+      paramElement = XSvnHelper.attach(paramElement,"value",results[i]);
       xmlResult.add(paramElement);
     }
-    return xmlResult;
+    return xmlResult.finish();
   }
-  public static FElem createXmlDirTree(File path, Boolean recursive) throws SVNException {
-    FElem element = new FElem(nsprefix, "files", nsuri);
-    element.add("xml:base", path.toURI().toString());
-    listEntries(path, recursive, element); 
-    return element;
+  public static FNode createXmlDirTree(File path, Boolean recursive) throws SVNException {
+    FBuilder element = XSvnHelper.build("files", nsuri, nsprefix);
+    element = XSvnHelper.attach(element, "xml:base", path.toURI().toString());
+    element = listEntries(path, recursive, element); 
+    return element.finish();
   }
-  public static FElem listEntries(File path, Boolean recursive, FElem dirElement) throws SVNException {
+
+  public static FBuilder listEntries(File path, Boolean recursive, FBuilder dirElement) throws SVNException {
     File[] dirList = path.listFiles();
     if( path.isDirectory() && dirList != null ) {
       for (File child : dirList ) {
         String elementName = child.isDirectory() ? "directory" : "file";
-        FElem element = new FElem(nsprefix, elementName, nsuri);
-        element.add("name", child.getName());
+        FBuilder element = XSvnHelper.build(elementName, nsuri, nsprefix);
+        element = XSvnHelper.attach(element,"name", child.getName());
         if(!child.isDirectory()) {
-          element.add("size", String.valueOf(child.length() / 1024));
+          element = XSvnHelper.attach(element, "size", String.valueOf(child.length() / 1024));
         }
         if(child.isDirectory() && recursive) {
-          listEntries(child, recursive, element);
+          dirElement = listEntries(child, recursive, element);
         }
         dirElement.add(element);
       }
     }
     return dirElement;
   }
-  public static FElem createXmlDirTree(String url, SVNRepository repository, Boolean recursive) throws SVNException {
-    FElem xmlResult = new FElem(nsprefix, "files", nsuri);
-    xmlResult.add("xml:base", url);
-    listEntries(repository, "", recursive, xmlResult);
-    return xmlResult;
+  public static FNode createXmlDirTree(String url, SVNRepository repository, Boolean recursive) throws SVNException {
+    FBuilder xmlResult = XSvnHelper.build("files", nsuri, nsprefix);
+    xmlResult = XSvnHelper.attach(xmlResult,"xml:base", url);
+    xmlResult = listEntries(repository, "", recursive, xmlResult);
+    return xmlResult.finish();
   }
-  public static FElem listEntries(SVNRepository repository, String path, Boolean recursive, FElem dirElement) throws SVNException {
+  public static FBuilder listEntries(SVNRepository repository, String path, Boolean recursive, FBuilder dirElement) throws SVNException {
     Collection entries = repository.getDir(path, -1 , null , (Collection) null);
     Iterator iterator = entries.iterator();
     String repositoryRootURL = repository.getRepositoryRoot(true).toString();
@@ -91,29 +97,29 @@ public class XSvnXmlReport {
       String elementName = entry.getKind() == SVNNodeKind.DIR ? "directory" : "file";
       String entryURL = entry.getURL().toString();
       String entryRelPath = entryURL.replace(repositoryRootURL, "");
-      FElem element = new FElem(nsprefix, elementName, nsuri);
-      element.add("name", entry.getName());
-      element.add("author", entry.getAuthor());
-      element.add("date", entry.getDate().toString());
-      element.add("revision", String.valueOf(entry.getRevision()));
+      FBuilder element = XSvnHelper.build(elementName, nsuri, nsprefix);
+      element = XSvnHelper.attach(element, "name", entry.getName());
+      element = XSvnHelper.attach(element, "author", entry.getAuthor());
+      element = XSvnHelper.attach(element, "date", entry.getDate().toString());
+      element = XSvnHelper.attach(element, "revision", String.valueOf(entry.getRevision()));
       if ( entry.getKind() == SVNNodeKind.FILE ) {
           SVNLock lock = repository.getLock( entryRelPath );
-          element.add("size", String.valueOf( entry.getSize() ));
+          element = XSvnHelper.attach(element, "size", String.valueOf( entry.getSize() ));
           if( lock != null ) {
-            element.add("lock-id", lock.getID());
-            element.add("lock-path", lock.getPath());
-            element.add("lock-owner", lock.getOwner());
-            element.add("lock-created", lock.getCreationDate().toString());
+            element = XSvnHelper.attach(element, "lock-id", lock.getID());
+            element = XSvnHelper.attach(element, "lock-path", lock.getPath());
+            element = XSvnHelper.attach(element, "lock-owner", lock.getOwner());
+            element = XSvnHelper.attach(element, "lock-created", lock.getCreationDate().toString());
             if( lock.getExpirationDate() != null ) {
-              element.add("lock-expires", lock.getExpirationDate().toString());
+              element = XSvnHelper.attach(element, "lock-expires", lock.getExpirationDate().toString());
             }
             if( lock.getComment() != null ) {
-              element.add("lock-comment", lock.getComment());
+              element = XSvnHelper.attach(element, "lock-comment", lock.getComment());
             }
           }
       }
       if (entry.getKind() == SVNNodeKind.DIR && recursive == true) {
-        listEntries(repository, (path.equals( "" )) ? entry.getName( ) : path + "/" + entry.getName( ), recursive, element);
+        element = listEntries(repository, (path.equals( "" )) ? entry.getName( ) : path + "/" + entry.getName( ), recursive, element);
       }
       dirElement.add(element);
     }
@@ -122,13 +128,14 @@ public class XSvnXmlReport {
   /**
    * Render errors as XML c:errors
    */
-  public static FElem createXmlError(String message) {
-    FElem xmlResult = new FElem(nsprefix, "errors", nsuri);
-    xmlResult.add("code", "svn-error");
-    FElem errorElement = new FElem(nsprefix, "error", nsuri);
-    errorElement.add("code", "error");
+  public static FNode createXmlError(String message) {
+    FBuilder xmlResult = XSvnHelper.build("errors", nsuri, nsprefix);
+
+    xmlResult = XSvnHelper.attach(xmlResult, "code", "svn-error");
+    FBuilder errorElement = XSvnHelper.build("error", nsuri, nsprefix);
+    errorElement = XSvnHelper.attach(errorElement,"code", "error");
     errorElement.add(message);
     xmlResult.add(errorElement);
-    return xmlResult;
+    return xmlResult.finish();
   }
 }

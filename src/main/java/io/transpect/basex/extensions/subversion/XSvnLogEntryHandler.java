@@ -1,30 +1,14 @@
 package io.transpect.basex.extensions.subversion;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.regex.Matcher;
 import java.util.Map;
-import java.util.regex.Pattern;
-
-import org.tmatesoft.svn.core.SVNException;
-import org.tmatesoft.svn.core.io.SVNRepository;
-import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
-import org.tmatesoft.svn.core.wc.admin.SVNAdminPath;
-import org.tmatesoft.svn.core.wc.SVNWCUtil;
-import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
-import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.ISVNLogEntryHandler;
 import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNLogEntryPath;
 
 import org.basex.query.value.node.FElem;
-import org.basex.query.value.map.XQMap;
-import org.basex.query.QueryException;
-import org.basex.query.value.item.*;
-import org.basex.query.value.Value;
-
-import io.transpect.basex.extensions.subversion.XSvnConnect;
-import io.transpect.basex.extensions.subversion.XSvnXmlReport;
+import org.basex.query.value.node.FNode;
+import org.basex.query.value.node.FBuilder;
+import org.basex.query.value.item.QNm;
 /**
  * Performs svn list. The class connects to a Subversion repository
  * and provides the results as XML directory tree.
@@ -37,30 +21,28 @@ public class XSvnLogEntryHandler implements ISVNLogEntryHandler {
   final static String nsuri = "http://www.w3.org/ns/xproc-step";
   
   public String Result;
-  public FElem XmlResult;
-  private String author;
-  private String changedPaths;
-  private String date;
-  private String message;
-  private String revision;
-  private String revisionProperties;
-  private String hash;
+  private FBuilder XmlResult;
   
   public XSvnLogEntryHandler()
   {
-    this.XmlResult = new FElem("log");
+    this.XmlResult = FElem.build(new QNm("log"));
+  }
+
+  public FNode getResult()
+  {
+    return this.XmlResult.finish();
   }
 	
-	public static FElem createXmlFromPaths(Map<String, SVNLogEntryPath> results) {
-    FElem xmlResult = new FElem(nsprefix, "changedPaths", nsuri);
-		xmlResult.add("changes", "" + results.size());
+	public static FBuilder createXmlFromPaths(Map<String, SVNLogEntryPath> results) {
+    FBuilder xmlResult = XSvnHelper.build("changedPaths",nsuri,nsprefix);
+		xmlResult.add(new QNm("changes"), "" + results.size());
+
     for(String key:results.keySet()) {
-			FElem pathElement = new FElem(nsprefix, "changedPath", nsuri);
+      FBuilder pathElement = XSvnHelper.build("changedPath", nsuri, nsprefix);
 			SVNLogEntryPath path = results.get(key);
-			
-      pathElement.add("name", key);
-      pathElement.add("path", path.getPath());
-      pathElement.add("type", "" + path.getType());
+      pathElement.add(new QNm("name"),key.getBytes());
+      pathElement.add(new QNm("path"),path.getPath().getBytes());
+      pathElement.add(new QNm("type"),path.getType());
       xmlResult.add(pathElement);
     }
     return xmlResult;
@@ -71,12 +53,13 @@ public class XSvnLogEntryHandler implements ISVNLogEntryHandler {
     Result = Result + '\n' + entry.toString();
     
     String elementName = "logEntry";
-    FElem element = new FElem(nsprefix, elementName, nsuri);
-    element.add("author",entry.getAuthor());
-    element.add("date",String.valueOf(entry.getDate()));
-    element.add("message",entry.getMessage());
-    element.add("revision",Long.toString(entry.getRevision()));
-		FElem changedPaths = createXmlFromPaths(entry.getChangedPaths());
+    FBuilder element = XSvnHelper.build(elementName,nsuri,nsprefix);
+    element.add(new QNm("author"),entry.getAuthor().getBytes());
+    element.add(new QNm("date"),String.valueOf(entry.getDate()).getBytes());
+    element.add(new QNm("message"),entry.getMessage().getBytes());
+    element.add(new QNm("revision"),Long.toString(entry.getRevision()).getBytes());
+
+		FBuilder changedPaths = createXmlFromPaths(entry.getChangedPaths());
 		element.add(changedPaths);
 		
     XmlResult.add(element);

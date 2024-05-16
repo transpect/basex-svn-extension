@@ -11,15 +11,10 @@ import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNStatus;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.wc.SVNStatusType;
-import org.tmatesoft.svn.core.wc.ISVNStatusHandler;
 
-import org.basex.query.value.node.FElem;
+import org.basex.query.value.node.FNode;
 import org.basex.query.value.map.XQMap;
 import org.basex.query.QueryException;
-
-import io.transpect.basex.extensions.subversion.XSvnConnect;
-import io.transpect.basex.extensions.subversion.XSvnXmlReport;
-import io.transpect.basex.extensions.subversion.XSvnStatusHandler;
 /**
  * This class provides the svn status command. Works
  * only with a working copy.
@@ -28,7 +23,7 @@ import io.transpect.basex.extensions.subversion.XSvnStatusHandler;
  */
 public class XSvnStatus {
   
-	public FElem XSvnStatus (String url, XQMap auth) {
+	public FNode XSvnStatus (String url, XQMap auth) {
     XSvnXmlReport report = new XSvnXmlReport();
     try{
       XSvnConnect connection = new XSvnConnect(url, auth);
@@ -36,12 +31,10 @@ public class XSvnStatus {
       XSvnStatusHandler handler = new XSvnStatusHandler();
       client.doStatus(new File(url),SVNRevision.HEAD,SVNDepth.INFINITY,false,false,false,false,handler,null);
       HashMap<String, String> results = getSVNStatus(handler.statusList);
-      FElem xmlResult = report.createXmlResult(results);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(results);
     } catch(QueryException | SVNException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
   
