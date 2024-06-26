@@ -8,7 +8,7 @@ import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 
-import org.basex.query.value.node.FElem;
+import org.basex.query.value.node.FNode;
 import org.basex.query.value.map.XQMap;
 import org.basex.query.QueryException;
 
@@ -26,8 +26,7 @@ public class XSvnAdd {
   /**
   * @deprecated  username/password login replaced with XQMap auth
   */
-  public FElem XSvnAdd(String url, String username, String password, String path, Boolean parents) {
-    XSvnXmlReport report = new XSvnXmlReport();
+  public FNode XSvnAdd(String url, String username, String password, String path, Boolean parents) {
     Boolean force = false;
     Boolean addAndMkdir = false;
     Boolean climbUnversionedParents = false;
@@ -42,15 +41,15 @@ public class XSvnAdd {
         File currentPath = new File( url + "/" + paths[i]);
         client.doAdd(currentPath, force, addAndMkdir, climbUnversionedParents, SVNDepth.INFINITY, includeIgnored, parents);
       }
-      FElem xmlResult = report.createXmlResult(baseURI, "add", paths);
+      FNode xmlResult = XSvnXmlReport.createXmlResult(baseURI, "add", paths);
       return xmlResult;
     } catch(SVNException|IOException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
+      FNode xmlError = XSvnXmlReport.createXmlError(svne.getMessage());
       return xmlError;
     }
   }
-	public FElem XSvnAdd(String url, XQMap auth, String path, Boolean parents) {
+	public FNode XSvnAdd(String url, XQMap auth, String path, Boolean parents) {
     XSvnXmlReport report = new XSvnXmlReport();
     Boolean force = false;
     Boolean addAndMkdir = false;
@@ -66,11 +65,11 @@ public class XSvnAdd {
         File currentPath = new File( url + "/" + paths[i]);
         client.doAdd(currentPath, force, addAndMkdir, climbUnversionedParents, SVNDepth.INFINITY, includeIgnored, parents);
       }
-      FElem xmlResult = report.createXmlResult(baseURI, "add", paths);
+      FNode xmlResult = XSvnXmlReport.createXmlResult(baseURI, "add", paths);
       return xmlResult;
     } catch(QueryException | SVNException|IOException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
+      FNode xmlError = XSvnXmlReport.createXmlError(svne.getMessage());
       return xmlError;
     }
   }

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+TESTBASEX=../basex/basex10
+
+PATH=$PATH:"/cygdrive/c/Program Files/Java/jdk-15/bin"
+echo "--- cleaning up from previous run"
+rm -rf jar/*
+echo "--- start compiling"
+#echo $CLASSPATH
+javac -Xdiags:verbose -Xlint:none -Xlint:deprecation -source 1.7 -target 1.7 -d . -cp 'lib/*' \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnConnect.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnList.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnHelper.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnCopy.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnStatusHandler.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnStatus.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnTreeHandler.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnXmlReport.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnCheckout.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnMkDir.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnUpdate.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnCommit.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnPropGet.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnPropSet.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnDelete.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnAdd.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnInfo.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnLock.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnLogEntryHandler.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnLog.java \
+      src/main/java/io/transpect/basex/extensions/subversion/XSvnApi.java
+if [ $? == 0 ]; then
+    echo "--- compile finished"
+    echo "--- deploy"
+    for i in io/transpect/basex/extensions/subversion; do  jar cvf jar/basex-svn-api.jar $i; done
+    rm $TESTBASEX/lib/custom/basex-svn-api.jar
+    cp -v jar/*.jar $TESTBASEX/lib/custom
+else
+    echo "--- ERROR: while compile"
+fi &&
+ $TESTBASEX/bin/basex.bat testrun.xq

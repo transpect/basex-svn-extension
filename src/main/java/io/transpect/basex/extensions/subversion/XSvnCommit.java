@@ -9,12 +9,10 @@ import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNCommitClient;
 
-import org.basex.query.value.node.FElem;
+import org.basex.query.value.node.FNode;
 import org.basex.query.value.map.XQMap;
 import org.basex.query.QueryException;
 
-import io.transpect.basex.extensions.subversion.XSvnConnect;
-import io.transpect.basex.extensions.subversion.XSvnXmlReport;
 /**
  * Commits one or more paths and their children 
  * in a SVN working directory to the assigned repository.
@@ -25,8 +23,7 @@ public class XSvnCommit {
   /**
   * @deprecated  username/password login replaced with XQMap auth
   */
-  public FElem XSvnCommit (String username, String password, String path, String commitMessage) {
-    XSvnXmlReport report = new XSvnXmlReport();
+  public FNode XSvnCommit (String username, String password, String path, String commitMessage) {
     try{
       String[] paths = path.split(" ");
       File[] filePaths = new File[paths.length];
@@ -43,15 +40,13 @@ public class XSvnCommit {
       Boolean keepChangelist = false;
       Boolean force = false;
       commitClient.doCommit(filePaths, keepLocks, commitMessage, svnProps, changelists, keepChangelist, force, SVNDepth.IMMEDIATES);
-      FElem xmlResult = report.createXmlResult(baseURI, "commit", paths);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(baseURI, "commit", paths);
     } catch(SVNException|IOException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
-	public FElem XSvnCommit (XQMap auth, String path, String commitMessage) {
+	public FNode XSvnCommit (XQMap auth, String path, String commitMessage) {
     XSvnXmlReport report = new XSvnXmlReport();
     try{
       String[] paths = path.split(" ");
@@ -69,12 +64,10 @@ public class XSvnCommit {
       Boolean keepChangelist = false;
       Boolean force = false;
       commitClient.doCommit(filePaths, keepLocks, commitMessage, svnProps, changelists, keepChangelist, force, SVNDepth.IMMEDIATES);
-      FElem xmlResult = report.createXmlResult(baseURI, "commit", paths);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(baseURI, "commit", paths);
     } catch(QueryException | SVNException|IOException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
 }

@@ -12,12 +12,9 @@ import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 
-import org.basex.query.value.node.FElem;
+import org.basex.query.value.node.FNode;
 import org.basex.query.value.map.XQMap;
 import org.basex.query.QueryException;
-
-import io.transpect.basex.extensions.subversion.XSvnConnect;
-import io.transpect.basex.extensions.subversion.XSvnXmlReport;
 /**
  * Checkout a working copy of a SVN repository	
  *
@@ -27,13 +24,11 @@ public class XSvnCheckout {
   /**
   * @deprecated  username/password login replaced with XQMap auth
   */
-  public FElem XSvnCheckout(String url, String username, String password, String path, String revision, String depth) {
-    XSvnXmlReport report = new XSvnXmlReport();
+  public FNode XSvnCheckout(String url, String username, String password, String path, String revision, String depth) {
     try{
       XSvnConnect connection = new XSvnConnect(path, username, password);
       SVNClientManager clientmngr = connection.getClientManager();
       SVNUpdateClient updateClient = clientmngr.getUpdateClient();
-      String baseURI = connection.isRemote() ? path : connection.getPath();
       SVNURL svnurl = SVNURL.parseURIEncoded( url );
       File checkoutPath = new File(path);
       SVNRevision svnRevision, svnPegRevision;
@@ -48,20 +43,16 @@ public class XSvnCheckout {
       results.put("repo", svnurl.toString());
       results.put("revision", String.valueOf(checkoutRevision));
       results.put("path", checkoutPath.getCanonicalFile().toString());
-      FElem xmlResult = report.createXmlResult(results);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(results);
     } catch(SVNException|IOException svne) {
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
-	public FElem XSvnCheckout(String url, XQMap auth, String path, String revision, String depth) {
-    XSvnXmlReport report = new XSvnXmlReport();
+	public FNode XSvnCheckout(String url, XQMap auth, String path, String revision, String depth) {
     try{
       XSvnConnect connection = new XSvnConnect(path, auth);
       SVNClientManager clientmngr = connection.getClientManager();
       SVNUpdateClient updateClient = clientmngr.getUpdateClient();
-      String baseURI = connection.isRemote() ? path : connection.getPath();
       SVNURL svnurl = SVNURL.parseURIEncoded( url );
       File checkoutPath = new File(path);
       SVNRevision svnRevision, svnPegRevision;
@@ -76,11 +67,9 @@ public class XSvnCheckout {
       results.put("repo", svnurl.toString());
       results.put("revision", String.valueOf(checkoutRevision));
       results.put("path", checkoutPath.getCanonicalFile().toString());
-      FElem xmlResult = report.createXmlResult(results);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(results);
     } catch(QueryException | SVNException | IOException svne) {
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
   private SVNDepth getSVNDepth(String depth) {

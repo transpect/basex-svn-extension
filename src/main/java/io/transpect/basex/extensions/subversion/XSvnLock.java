@@ -1,25 +1,15 @@
 package io.transpect.basex.extensions.subversion;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 import java.io.File;
-
-import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmNode;
 
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
 
-import org.basex.query.value.node.FElem;
+import org.basex.query.value.node.FNode;
 import org.basex.query.value.map.XQMap;
 import org.basex.query.QueryException;
-
-import io.transpect.basex.extensions.subversion.XSvnConnect;
-import io.transpect.basex.extensions.subversion.XSvnXmlReport;
 /**
  * Performs svn lock and unlock as XML Calabash extension step for
  * XProc. The class connects to a Subversion repository and
@@ -33,10 +23,9 @@ public class XSvnLock {
   /**
   * @deprecated  username/password login replaced with XQMap auth
   */
-  public FElem XSvnLock ( String url, String username, String password, String paths, Boolean unlock, Boolean breakLock, String message ) {
+  public FNode XSvnLock ( String url, String username, String password, String paths, Boolean unlock, Boolean breakLock, String message ) {
 
     String[] pathsArr = paths.split(" ");
-    XSvnXmlReport report = new XSvnXmlReport();
     try{
       XSvnConnect connection = new XSvnConnect(url, username, password);
       SVNClientManager clientmngr = connection.getClientManager();
@@ -65,18 +54,15 @@ public class XSvnLock {
           client.doLock(filesArr, breakLock, message);
         }
       }
-      FElem xmlResult = report.createXmlResult(url, ( unlock ? "unlock" : "lock" ), pathsArr);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(url, ( unlock ? "unlock" : "lock" ), pathsArr);
     } catch (SVNException svne){
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
-	public FElem XSvnLock ( String url, XQMap auth, String paths, Boolean unlock, Boolean breakLock, String message ) {
+	public FNode XSvnLock ( String url, XQMap auth, String paths, Boolean unlock, Boolean breakLock, String message ) {
 
     String[] pathsArr = paths.split(" ");
-    XSvnXmlReport report = new XSvnXmlReport();
     try{
       XSvnConnect connection = new XSvnConnect(url, auth);
       SVNClientManager clientmngr = connection.getClientManager();
@@ -105,12 +91,10 @@ public class XSvnLock {
           client.doLock(filesArr, breakLock, message);
         }
       }
-      FElem xmlResult = report.createXmlResult(url, ( unlock ? "unlock" : "lock" ), pathsArr);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(url, ( unlock ? "unlock" : "lock" ), pathsArr);
     } catch (QueryException | SVNException svne){
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
 }

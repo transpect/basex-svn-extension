@@ -9,12 +9,9 @@ import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNInfo;
 
-import org.basex.query.value.node.FElem;
+import org.basex.query.value.node.FNode;
 import org.basex.query.value.map.XQMap;
 import org.basex.query.QueryException;
-
-import io.transpect.basex.extensions.subversion.XSvnConnect;
-import io.transpect.basex.extensions.subversion.XSvnXmlReport;
 /**
  * This class provides the svn info command. The class 
  * connects to a Subversion repository and provides 
@@ -27,7 +24,7 @@ public class XSvnInfo {
   /**
   * @deprecated  username/password login replaced with XQMap auth
   */
-  public FElem XSvnInfo (String url, String username, String password) {
+  public FNode XSvnInfo (String url, String username, String password) {
     XSvnXmlReport report = new XSvnXmlReport();
     try{
       XSvnConnect connection = new XSvnConnect(url, username, password);
@@ -39,17 +36,14 @@ public class XSvnInfo {
         info = client.doInfo(new File(url), SVNRevision.HEAD);
       }
       HashMap<String, String> results = getSVNInfo(info);
-      FElem xmlResult = report.createXmlResult(results);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(results);
     } catch(SVNException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
 	
-	public FElem XSvnInfo (String url, XQMap auth) {
-    XSvnXmlReport report = new XSvnXmlReport();
+	public FNode XSvnInfo (String url, XQMap auth) {
     try{
       XSvnConnect connection = new XSvnConnect(url, auth);
       SVNWCClient client = connection.getClientManager().getWCClient();
@@ -60,12 +54,10 @@ public class XSvnInfo {
         info = client.doInfo(new File(url), SVNRevision.HEAD);
       }
       HashMap<String, String> results = getSVNInfo(info);
-      FElem xmlResult = report.createXmlResult(results);
-      return xmlResult;
+      return XSvnXmlReport.createXmlResult(results);
     } catch(QueryException | SVNException svne) {
       System.out.println(svne.getMessage());
-      FElem xmlError = report.createXmlError(svne.getMessage());
-      return xmlError;
+      return XSvnXmlReport.createXmlError(svne.getMessage());
     }
   }
   /**
