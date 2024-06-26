@@ -15,6 +15,8 @@ to compile from sources.
 You can set the BaseX-Instance to test it with via the
 `$TESTBASEX`-Option
 
+The test query is found in `testrun.xq`
+
 
 ## How to use
 
