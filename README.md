@@ -4,7 +4,17 @@ SVN commands as XQuery functions for BaseX
 ## Requirements
 
 * Java 1.8 or later
-* BaseX 9.0 or later (older versions might work too, but didn't tested)
+* BaseX 10.7 
+
+## How to build
+
+```
+./compile
+```
+to compile from sources.
+You can set the BaseX-Instance to test it with via the
+`$TESTBASEX`-Option
+
 
 ## How to use
 
